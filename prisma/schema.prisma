@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id             String     @id @default(cuid())
+  username       String     @unique
+  email          String     @unique
+  name           String
+  passwordHash   String
+  role           Role       @default(USER)
+  status         UserStatus @default(PENDING)
+  approvedAt     DateTime?
+  approvedById   String?
+  approvedBy     User?      @relation("ApprovedUsers", fields: [approvedById], references: [id])
+  approvedUsers  User[]     @relation("ApprovedUsers")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  uploadedResources  Resource[]
+  permissions        ResourcePermission[]
+  downloadLogs       DownloadLog[]
+  grantedPermissions ResourcePermission[] @relation("GrantedPermissions")
+}
+
+model Faculty {
+  id            String   @id @default(cuid())
+  name          String
+  position      String
+  major         String?
+  email         String?
+  phone         String?
+  photoUrl      String?
+  summary       String?
+  education     String?
+  career        String?
+  researchAreas String?
+  papers        String?
+  achievements  String?
+  displayOrder  Int      @default(0)
+  isVisible     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Achievement {
+  id           String              @id @default(cuid())
+  category     AchievementCategory
+  year         Int?
+  title        String
+  organization String?
+  description  String?
+  people       String?
+  amount       String?
+  role         String?
+  source       String?
+  displayOrder Int                 @default(0)
+  isVisible    Boolean             @default(true)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model Resource {
+  id               String       @id @default(cuid())
+  title            String
+  description      String?
+  resourceType     ResourceType
+  storageType      StorageType
+  filePath         String?
+  originalFileName String?
+  driveUrl         String?
+  thumbnailUrl     String?
+  isPublished      Boolean      @default(true)
+  uploadedById     String
+  uploadedBy       User         @relation(fields: [uploadedById], references: [id])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  permissions  ResourcePermission[]
+  downloadLogs DownloadLog[]
+}
+
+model ResourcePermission {
+  id          String   @id @default(cuid())
+  userId      String
+  resourceId  String
+  grantedById String
+  grantedAt   DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource  Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  grantedBy User     @relation("GrantedPermissions", fields: [grantedById], references: [id])
+
+  @@unique([userId, resourceId])
+}
+
+model DownloadLog {
+  id           String   @id @default(cuid())
+  userId       String
+  resourceId   String
+  downloadedAt DateTime @default(now())
+  ipAddress    String?
+
+  user     User     @relation(fields: [userId], references: [id])
+  resource Resource @relation(fields: [resourceId], references: [id])
+}
+
+model SocialLink {
+  id           String  @id @default(cuid())
+  name         String
+  url          String
+  type         String
+  icon         String?
+  displayOrder Int     @default(0)
+  isVisible    Boolean @default(true)
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  BLOCKED
+}
+
+enum AchievementCategory {
+  RESEARCH
+  AWARD
+  EMPLOYMENT
+  CERTIFICATE
+  ACTIVITY
+  COURSE
+  PATENT
+  GRADUATE_SCHOOL
+  PAPER
+}
+
+enum ResourceType {
+  VIDEO
+  PPT
+  PDF
+  ZIP
+  DOCUMENT
+  LINK
+  OTHER
+}
+
+enum StorageType {
+  FILE
+  GOOGLE_DRIVE_LINK
+  EXTERNAL_LINK
+}
