@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { db } from './lib/db'
+import { getPageContent } from './lib/siteContent'
 
 async function getHomeData() {
   const [faculty, achievements, socialLinks] = await Promise.all([
@@ -20,15 +21,6 @@ const KPI_MAP: Record<string, { label: string; suffix: string; color: string }> 
   ACTIVITY: { label: '비교과 활동', suffix: '건', color: 'text-pink-400' },
   CERTIFICATE: { label: '자격증 항목', suffix: '개', color: 'text-indigo-400' },
 }
-
-const COMPETENCIES = [
-  { icon: '🔐', label: '해킹보안', desc: '침투 테스트, 취약점 분석, 해킹 대응' },
-  { icon: '🤖', label: 'AI 보안', desc: '머신러닝 기반 위협 탐지, AI 보안 기술' },
-  { icon: '🔍', label: '디지털 포렌식', desc: '디지털 증거 수집, 사이버 범죄 수사' },
-  { icon: '☁️', label: '클라우드 보안', desc: '클라우드 아키텍처 보안, 멀티클라우드' },
-  { icon: '🛡️', label: '융합보안', desc: '물리·사이버 융합보안, 산업보안' },
-  { icon: '🚨', label: '보안관제', desc: '침해대응, SIEM, 통합 보안관제' },
-]
 
 function SnsIcon({ type }: { type: string }) {
   if (type === 'INSTAGRAM') {
@@ -56,6 +48,7 @@ function SnsIcon({ type }: { type: string }) {
 
 export default async function HomePage() {
   const { faculty, achievements, socialLinks } = await getHomeData()
+  const content = await getPageContent('home')
 
   const kpiData = achievements
     .map((a) => ({
@@ -74,14 +67,14 @@ export default async function HomePage() {
           <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500 rounded-full blur-3xl" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 py-24 md:py-36 text-center">
-          <p className="text-blue-400 font-semibold text-sm tracking-widest uppercase mb-4">Keukdong University</p>
+          <p className="text-blue-400 font-semibold text-sm tracking-widest uppercase mb-4">{content.hero.eyebrow}</p>
           <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-6">
-            극동대학교<br />
-            <span className="text-blue-400">해킹보안학과</span> · <span className="text-indigo-400">인공지능보안학과</span>
+            {content.hero.titleLine1}<br />
+            <span className="text-blue-400">{content.hero.deptHacking}</span> · <span className="text-indigo-400">{content.hero.deptAi}</span>
           </h1>
           <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            AI와 사이버보안을 융합한 실전형 보안 인재 양성<br />
-            <span className="text-slate-400 text-base">실습 중심 교육 · 연구수주 · 학술성과 · 취업성과</span>
+            {content.hero.subtitle}<br />
+            <span className="text-slate-400 text-base">{content.hero.subtitleSmall}</span>
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/achievements" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
@@ -127,8 +120,8 @@ export default async function HomePage() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">학과 주요 실적</h2>
-            <p className="text-slate-500">해킹보안·인공지능보안 분야 교육·연구·취업 성과</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">{content.kpiSection.title}</h2>
+            <p className="text-slate-500">{content.kpiSection.subtitle}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {kpiData.slice(0, 8).map((kpi, i) => (
@@ -150,11 +143,11 @@ export default async function HomePage() {
       <section className="py-16 bg-gradient-to-br from-slate-900 to-blue-950 text-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">학과 핵심 역량</h2>
-            <p className="text-slate-400">해킹보안·AI보안·디지털포렌식·클라우드보안·융합보안·보안관제</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">{content.competenciesSection.title}</h2>
+            <p className="text-slate-400">{content.competenciesSection.subtitle}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {COMPETENCIES.map((c, i) => (
+            {content.competencies.map((c, i) => (
               <div key={i} className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-6 transition-colors">
                 <div className="text-3xl mb-3">{c.icon}</div>
                 <h3 className="font-bold text-white mb-2">{c.label}</h3>
@@ -202,11 +195,10 @@ export default async function HomePage() {
       <section className="py-16 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="text-4xl mb-4">📁</div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">자료실</h2>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              학과 교육 자료, 연구 자료, 강의 영상 등을 자료실에서 확인하세요.<br />
-              회원가입 후 관리자 승인이 완료되면 자료에 접근하실 수 있습니다.
+            <div className="text-4xl mb-4">{content.resourceSection.icon}</div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">{content.resourceSection.title}</h2>
+            <p className="text-slate-600 mb-6 leading-relaxed whitespace-pre-line">
+              {content.resourceSection.body}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/resources" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">

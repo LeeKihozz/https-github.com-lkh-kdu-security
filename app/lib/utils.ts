@@ -19,7 +19,7 @@ export function formatAmount(amount: string | null | undefined): string {
   return amount
 }
 
-export const ALLOWED_EXTENSIONS = ['ppt', 'pptx', 'pdf', 'mp4', 'mov', 'zip', 'doc', 'docx', 'hwp', 'hwpx']
+export const ALLOWED_EXTENSIONS = ['ppt', 'pptx', 'pdf', 'mp4', 'mov', 'zip', 'doc', 'docx', 'hwp', 'hwpx', 'mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac']
 export const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
 export function isAllowedFileType(filename: string): boolean {
@@ -41,6 +41,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
 
 export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   VIDEO: '영상',
+  AUDIO: '음성녹음',
   PPT: 'PPT',
   PDF: 'PDF',
   ZIP: 'ZIP',

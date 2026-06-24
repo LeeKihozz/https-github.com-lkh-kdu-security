@@ -114,6 +114,7 @@ export default function NewResourcePage() {
               <option value="PDF">PDF</option>
               <option value="PPT">PPT</option>
               <option value="VIDEO">영상</option>
+              <option value="AUDIO">음성녹음</option>
               <option value="ZIP">ZIP</option>
               <option value="DOCUMENT">문서</option>
               <option value="LINK">링크</option>

@@ -145,6 +145,7 @@ enum AchievementCategory {
 
 enum ResourceType {
   VIDEO
+  AUDIO
   PPT
   PDF
   ZIP
@@ -157,4 +158,10 @@ enum StorageType {
   FILE
   GOOGLE_DRIVE_LINK
   EXTERNAL_LINK
+}
+
+model SiteContent {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
