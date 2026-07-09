@@ -38,7 +38,9 @@ export async function createSession(userId: string, role: string, status: string
 
   cookieStore.set('session', session, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    // HTTPS가 아닌 맨 IP(HTTP)로 서비스하면 secure 쿠키를 브라우저가 저장하지 않아
+    // 로그인 직후 다시 로그인 화면으로 튕긴다. HTTPS 적용 후 COOKIE_SECURE=true 로 켤 것.
+    secure: process.env.COOKIE_SECURE === 'true',
     expires: expiresAt,
     sameSite: 'lax',
     path: '/',
