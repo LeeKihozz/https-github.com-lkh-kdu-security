@@ -17,10 +17,10 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-3">바로가기</h3>
             <ul className="space-y-1.5 text-sm">
-              <li><Link href="/about" className="hover:text-white transition-colors">학과소개</Link></li>
-              <li><Link href="/achievements" className="hover:text-white transition-colors">학과 실적</Link></li>
-              <li><Link href="/faculty" className="hover:text-white transition-colors">교수진 소개</Link></li>
+              <li><Link href="/" className="hover:text-white transition-colors">홈</Link></li>
               <li><Link href="/resources" className="hover:text-white transition-colors">자료실</Link></li>
+              <li><Link href="/login" className="hover:text-white transition-colors">로그인</Link></li>
+              <li><Link href="/register" className="hover:text-white transition-colors">회원가입</Link></li>
             </ul>
           </div>
           <div>

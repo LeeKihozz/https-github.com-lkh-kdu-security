@@ -10,9 +10,6 @@ type NavbarProps = {
 
 const navLinks = [
   { href: '/', label: '홈' },
-  { href: '/about', label: '학과소개' },
-  { href: '/achievements', label: '실적' },
-  { href: '/faculty', label: '교수진' },
   { href: '/resources', label: '자료실' },
 ]
 

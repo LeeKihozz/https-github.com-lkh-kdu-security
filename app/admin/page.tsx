@@ -2,11 +2,11 @@ import Link from 'next/link'
 import { db } from '@/app/lib/db'
 
 export default async function AdminDashboard() {
-  const [pendingUsers, resources, achievements, faculty] = await Promise.all([
+  const [pendingUsers, resources, unpublished, downloads] = await Promise.all([
     db.user.count({ where: { status: 'PENDING' } }),
     db.resource.count(),
-    db.achievement.count(),
-    db.faculty.count(),
+    db.resource.count({ where: { isPublished: false } }),
+    db.downloadLog.count(),
   ])
 
   const recentDownloads = await db.downloadLog.findMany({
@@ -21,8 +21,8 @@ export default async function AdminDashboard() {
   const stats = [
     { label: '승인 대기 사용자', value: pendingUsers, href: '/admin/users', alert: pendingUsers > 0, color: 'text-red-600' },
     { label: '등록된 자료', value: resources, href: '/admin/resources', color: 'text-blue-600' },
-    { label: '실적 데이터', value: achievements, href: '/admin/achievements', color: 'text-green-600' },
-    { label: '교수진', value: faculty, href: '/admin/faculty', color: 'text-purple-600' },
+    { label: '비공개 자료', value: unpublished, href: '/admin/resources', color: 'text-slate-600' },
+    { label: '누적 다운로드', value: downloads, href: '/admin/resources', color: 'text-amber-600' },
   ]
 
   return (
@@ -55,12 +55,12 @@ export default async function AdminDashboard() {
               <span className="text-sm font-medium text-slate-700">자료 등록</span>
               <span className="text-slate-400">→</span>
             </Link>
-            <Link href="/admin/achievements" className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <span className="text-sm font-medium text-slate-700">실적 추가</span>
+            <Link href="/admin/resources" className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+              <span className="text-sm font-medium text-slate-700">자료 목록 / 권한 관리</span>
               <span className="text-slate-400">→</span>
             </Link>
-            <Link href="/admin/faculty" className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <span className="text-sm font-medium text-slate-700">교수진 관리</span>
+            <Link href="/admin/content" className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+              <span className="text-sm font-medium text-slate-700">메인 페이지 문구 편집</span>
               <span className="text-slate-400">→</span>
             </Link>
           </div>

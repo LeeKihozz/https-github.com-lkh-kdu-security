@@ -1,26 +1,11 @@
 import Link from 'next/link'
 import { db } from './lib/db'
 import { getPageContent } from './lib/siteContent'
+import { getResourceStats } from './lib/resourceStats'
+import ResourceStatsBoard from './components/ResourceStatsBoard'
 
-async function getHomeData() {
-  const [faculty, achievements, socialLinks] = await Promise.all([
-    db.faculty.findMany({ where: { isVisible: true }, orderBy: { displayOrder: 'asc' }, take: 4 }),
-    db.achievement.groupBy({ by: ['category'], where: { isVisible: true }, _count: { category: true } }),
-    db.socialLink.findMany({ where: { isVisible: true }, orderBy: { displayOrder: 'asc' } }),
-  ])
-  return { faculty, achievements, socialLinks }
-}
-
-const KPI_MAP: Record<string, { label: string; suffix: string; color: string }> = {
-  RESEARCH: { label: '연구수주', suffix: '건', color: 'text-blue-400' },
-  AWARD: { label: '수상 실적', suffix: '건', color: 'text-yellow-400' },
-  EMPLOYMENT: { label: '취업처', suffix: '개', color: 'text-green-400' },
-  PAPER: { label: '논문 실적', suffix: '편', color: 'text-purple-400' },
-  PATENT: { label: '특허', suffix: '건', color: 'text-orange-400' },
-  COURSE: { label: '전공 교과목', suffix: '개', color: 'text-cyan-400' },
-  ACTIVITY: { label: '비교과 활동', suffix: '건', color: 'text-pink-400' },
-  CERTIFICATE: { label: '자격증 항목', suffix: '개', color: 'text-indigo-400' },
-}
+// 자료실 내용이 항상 실시간으로 반영되도록 정적 캐시를 사용하지 않는다.
+export const dynamic = 'force-dynamic'
 
 function SnsIcon({ type }: { type: string }) {
   if (type === 'INSTAGRAM') {
@@ -47,16 +32,11 @@ function SnsIcon({ type }: { type: string }) {
 }
 
 export default async function HomePage() {
-  const { faculty, achievements, socialLinks } = await getHomeData()
-  const content = await getPageContent('home')
-
-  const kpiData = achievements
-    .map((a) => ({
-      ...KPI_MAP[a.category],
-      count: a._count.category,
-      category: a.category,
-    }))
-    .filter((a) => a.label)
+  const [content, stats, socialLinks] = await Promise.all([
+    getPageContent('home'),
+    getResourceStats(),
+    db.socialLink.findMany({ where: { isVisible: true }, orderBy: { displayOrder: 'asc' } }),
+  ])
 
   return (
     <div className="min-h-screen">
@@ -66,7 +46,7 @@ export default async function HomePage() {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500 rounded-full blur-3xl" />
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 py-24 md:py-36 text-center">
+        <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-28 text-center">
           <p className="text-blue-400 font-semibold text-sm tracking-widest uppercase mb-4">{content.hero.eyebrow}</p>
           <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-6">
             {content.hero.titleLine1}<br />
@@ -77,122 +57,45 @@ export default async function HomePage() {
             <span className="text-slate-400 text-base">{content.hero.subtitleSmall}</span>
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/achievements" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
-              학과 실적 보기
-            </Link>
-            <Link href="/faculty" className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg font-semibold transition-colors">
-              교수진 보기
-            </Link>
-            <Link href="/resources" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors">
+            <Link href="/resources" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
               자료실 바로가기
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* SNS Links */}
-      <section className="bg-slate-800 py-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-center text-white font-semibold text-lg mb-8">소통 채널</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-            {socialLinks.map((link) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-3 p-6 bg-slate-700 hover:bg-slate-600 rounded-xl text-white transition-all hover:scale-105 group min-h-[120px] justify-center"
-              >
-                <span className={
-                  link.type === 'INSTAGRAM' ? 'text-pink-400' :
-                  link.type === 'YOUTUBE' ? 'text-red-400' : 'text-blue-400'
-                }>
-                  <SnsIcon type={link.type} />
-                </span>
-                <span className="font-medium text-sm">{link.name}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* KPI */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">{content.kpiSection.title}</h2>
-            <p className="text-slate-500">{content.kpiSection.subtitle}</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {kpiData.slice(0, 8).map((kpi, i) => (
-              <div key={i} className="bg-slate-50 rounded-xl p-6 text-center border border-slate-200 hover:shadow-md transition-shadow">
-                <div className={`text-3xl font-bold mb-1 ${kpi.color}`}>{kpi.count}{kpi.suffix}</div>
-                <div className="text-slate-600 text-sm font-medium">{kpi.label}</div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/achievements" className="inline-block px-6 py-2.5 bg-slate-900 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors">
-              상세 실적 보기 →
+            <Link href="/register" className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg font-semibold transition-colors">
+              회원가입
             </Link>
           </div>
+
+          {/* 히어로 요약 수치 */}
+          <div className="mt-14 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+            <div className="bg-white/5 border border-white/10 rounded-xl py-5">
+              <div className="text-3xl font-bold text-blue-400">{stats.total}</div>
+              <div className="text-slate-400 text-xs mt-1">전체 자료</div>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl py-5">
+              <div className="text-3xl font-bold text-emerald-400">{stats.byType.length}</div>
+              <div className="text-slate-400 text-xs mt-1">자료 유형</div>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl py-5">
+              <div className="text-3xl font-bold text-indigo-400">{stats.recentCount}</div>
+              <div className="text-slate-400 text-xs mt-1">최근 30일 등록</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Competencies */}
-      <section className="py-16 bg-gradient-to-br from-slate-900 to-blue-950 text-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">{content.competenciesSection.title}</h2>
-            <p className="text-slate-400">{content.competenciesSection.subtitle}</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {content.competencies.map((c, i) => (
-              <div key={i} className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-6 transition-colors">
-                <div className="text-3xl mb-3">{c.icon}</div>
-                <h3 className="font-bold text-white mb-2">{c.label}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{c.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Faculty Preview */}
-      {faculty.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">교수진</h2>
-              <p className="text-slate-500">AI·사이버보안 분야 전문 교수진</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {faculty.map((f) => (
-                <Link
-                  key={f.id}
-                  href={`/faculty/${f.id}`}
-                  className="text-center p-6 rounded-xl border border-slate-200 hover:shadow-lg transition-all hover:border-blue-300 group"
-                >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
-                    {f.name[0]}
-                  </div>
-                  <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{f.name}</h3>
-                  <p className="text-slate-500 text-sm mt-1">{f.position}</p>
-                  {f.major && <p className="text-slate-400 text-xs mt-1">{f.major}</p>}
-                </Link>
-              ))}
-            </div>
-            <div className="text-center mt-8">
-              <Link href="/faculty" className="inline-block px-6 py-2.5 bg-slate-900 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors">
-                전체 교수진 보기 →
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Resource Info */}
+      {/* 자료실 통계 (실시간) */}
       <section className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <ResourceStatsBoard
+            initial={stats}
+            title={content.statsSection.title}
+            subtitle={content.statsSection.subtitle}
+          />
+        </div>
+      </section>
+
+      {/* 자료실 안내 */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
             <div className="text-4xl mb-4">{content.resourceSection.icon}</div>
@@ -211,6 +114,34 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* SNS Links */}
+      {socialLinks.length > 0 && (
+        <section className="bg-slate-800 py-10">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-center text-white font-semibold text-lg mb-8">소통 채널</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-3 p-6 bg-slate-700 hover:bg-slate-600 rounded-xl text-white transition-all hover:scale-105 min-h-[120px] justify-center"
+                >
+                  <span className={
+                    link.type === 'INSTAGRAM' ? 'text-pink-400' :
+                    link.type === 'YOUTUBE' ? 'text-red-400' : 'text-blue-400'
+                  }>
+                    <SnsIcon type={link.type} />
+                  </span>
+                  <span className="font-medium text-sm">{link.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

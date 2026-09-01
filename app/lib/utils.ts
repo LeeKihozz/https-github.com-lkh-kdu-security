@@ -49,3 +49,9 @@ export const RESOURCE_TYPE_LABELS: Record<string, string> = {
   LINK: '링크',
   OTHER: '기타',
 }
+
+export const STORAGE_TYPE_LABELS: Record<string, string> = {
+  FILE: '서버 업로드 파일',
+  GOOGLE_DRIVE_LINK: 'Google Drive 링크',
+  EXTERNAL_LINK: '외부 링크',
+}

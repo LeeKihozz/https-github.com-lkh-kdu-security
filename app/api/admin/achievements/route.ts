@@ -17,6 +17,18 @@ const schema = z.object({
   isVisible: z.boolean().optional(),
 })
 
+export async function GET() {
+  try {
+    await requireAdmin()
+    const achievements = await db.achievement.findMany({
+      orderBy: [{ year: 'desc' }, { displayOrder: 'asc' }],
+    })
+    return NextResponse.json({ achievements })
+  } catch {
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 })
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     await requireAdmin()

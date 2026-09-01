@@ -18,9 +18,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/admin" className="hover:text-amber-200 transition-colors">대시보드</Link>
         <Link href="/admin/users" className="hover:text-amber-200 transition-colors">사용자 관리</Link>
         <Link href="/admin/resources" className="hover:text-amber-200 transition-colors">자료 관리</Link>
-        <Link href="/admin/achievements" className="hover:text-amber-200 transition-colors">실적 관리</Link>
-        <Link href="/admin/faculty" className="hover:text-amber-200 transition-colors">교수진 관리</Link>
-        <Link href="/admin/content" className="hover:text-amber-200 transition-colors">페이지 편집</Link>
+        <Link href="/admin/achievements" className="hover:text-amber-200 transition-colors">실적 데이터(비공개)</Link>
+        <Link href="/admin/faculty" className="hover:text-amber-200 transition-colors">교수진 데이터(비공개)</Link>
+        <Link href="/admin/content" className="hover:text-amber-200 transition-colors">메인 페이지 편집</Link>
         <span className="ml-auto">
           <Link href="/" className="text-amber-200 hover:text-white text-xs">← 사이트로 돌아가기</Link>
         </span>

@@ -35,7 +35,7 @@ export default function AdminAchievementsPage() {
   })
 
   async function loadAchievements() {
-    const res = await fetch('/api/achievements')
+    const res = await fetch('/api/admin/achievements')
     const data = await res.json()
     setAchievements(data.achievements ?? [])
     setLoading(false)

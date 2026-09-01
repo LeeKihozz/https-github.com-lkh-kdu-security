@@ -33,7 +33,7 @@ export default function AdminFacultyPage() {
   })
 
   async function loadFaculty() {
-    const res = await fetch('/api/faculty')
+    const res = await fetch('/api/admin/faculty')
     const data = await res.json()
     setFaculty(data.faculty ?? [])
     setLoading(false)
@@ -148,9 +148,6 @@ export default function AdminFacultyPage() {
               </div>
               {f.email && <div className="text-xs text-slate-400 mb-3">✉️ {f.email}</div>}
               <div className="flex gap-2">
-                <a href={`/faculty/${f.id}`} target="_blank" className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs">
-                  보기
-                </a>
                 <button
                   onClick={() => deleteF(f.id)}
                   disabled={processing === f.id}
