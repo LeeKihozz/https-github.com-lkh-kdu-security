@@ -7,6 +7,7 @@ export type ResourceStats = {
   contributors: number
   latestAt: string | null
   byType: { type: string; count: number }[]
+  byCategory: { category: string; count: number; groups: number }[]
   byStorage: { type: string; count: number }[]
   monthly: { label: string; count: number }[]
   generatedAt: string
@@ -24,10 +25,12 @@ export async function getResourceStats(): Promise<ResourceStats> {
   since30.setDate(since30.getDate() - 30)
   const monthStart = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  const [total, byType, byStorage, latest, downloads, contributors, recentCount, monthRows] =
+  const [total, byType, byCategoryRows, groupRows, byStorage, latest, downloads, contributors, recentCount, monthRows] =
     await Promise.all([
       db.resource.count({ where }),
       db.resource.groupBy({ by: ['resourceType'], where, _count: { resourceType: true } }),
+      db.resource.groupBy({ by: ['category'], where, _count: { category: true } }),
+      db.resource.findMany({ where, select: { category: true, groupName: true } }),
       db.resource.groupBy({ by: ['storageType'], where, _count: { storageType: true } }),
       db.resource.findFirst({ where, orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
       db.downloadLog.count(),
@@ -64,6 +67,20 @@ export async function getResourceStats(): Promise<ResourceStats> {
     latestAt: latest?.createdAt ? new Date(latest.createdAt).toISOString() : null,
     byType: byType
       .map((t) => ({ type: t.resourceType as string, count: t._count.resourceType }))
+      .sort((a, b) => b.count - a.count),
+    byCategory: byCategoryRows
+      .map((c) => {
+        const cat = c.category as string
+        const named = new Set<string>()
+        let solo = 0
+        for (const r of groupRows) {
+          if ((r.category as string) !== cat) continue
+          const g = r.groupName?.trim()
+          if (g) named.add(g)
+          else solo += 1
+        }
+        return { category: cat, count: c._count.category, groups: named.size + solo }
+      })
       .sort((a, b) => b.count - a.count),
     byStorage: byStorage
       .map((s) => ({ type: s.storageType as string, count: s._count.storageType }))

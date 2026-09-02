@@ -34,6 +34,8 @@ export async function GET(request: Request) {
         title: true,
         description: true,
         resourceType: true,
+        category: true,
+        groupName: true,
         storageType: true,
         thumbnailUrl: true,
         originalFileName: true,
@@ -45,7 +47,7 @@ export async function GET(request: Request) {
           select: { id: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ groupName: 'asc' }, { title: 'asc' }],
     })
 
     const result = resources.map((r) => ({

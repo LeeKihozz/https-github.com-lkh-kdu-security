@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { ResourceStats } from '@/app/lib/resourceStats'
-import { RESOURCE_TYPE_LABELS, STORAGE_TYPE_LABELS } from '@/app/lib/utils'
+import {
+  RESOURCE_TYPE_LABELS,
+  STORAGE_TYPE_LABELS,
+  RESOURCE_CATEGORY_LABELS,
+  RESOURCE_CATEGORY_META,
+} from '@/app/lib/utils'
 
 const TYPE_STYLES: Record<string, { bar: string; dot: string; icon: string }> = {
   VIDEO: { bar: 'bg-rose-500', dot: 'bg-rose-500', icon: '🎬' },
@@ -86,7 +91,7 @@ export default function ResourceStatsBoard({ initial, title, subtitle }: Props) 
   const summary = [
     { label: '전체 자료', value: stats.total, unit: '건', color: 'text-blue-600', icon: '📚' },
     { label: '최근 30일 등록', value: stats.recentCount, unit: '건', color: 'text-emerald-600', icon: '🆕' },
-    { label: '자료 유형', value: stats.byType.length, unit: '종', color: 'text-indigo-600', icon: '🗂️' },
+    { label: '자료 분류', value: stats.byCategory.length, unit: '종', color: 'text-indigo-600', icon: '🗂️' },
     { label: '누적 다운로드', value: stats.downloads, unit: '회', color: 'text-amber-600', icon: '⬇️' },
   ]
 
@@ -126,6 +131,38 @@ export default function ResourceStatsBoard({ initial, title, subtitle }: Props) 
           </div>
         ))}
       </div>
+
+      {/* 카테고리별 바로가기 */}
+      {stats.byCategory.length > 0 && (
+        <div>
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="font-bold text-slate-900">분류별 자료</h3>
+            <span className="text-xs text-slate-400">클릭하면 해당 분류의 자료실로 이동합니다</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {stats.byCategory.map((c) => {
+              const meta = RESOURCE_CATEGORY_META[c.category]
+              return (
+                <Link
+                  key={c.category}
+                  href={`/resources?category=${c.category}`}
+                  className="bg-white rounded-xl border border-slate-200 p-4 hover:border-blue-300 hover:shadow-md transition-all group"
+                >
+                  <div className="text-2xl mb-2">{meta?.icon ?? '📦'}</div>
+                  <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    {RESOURCE_CATEGORY_LABELS[c.category] ?? c.category}
+                  </div>
+                  <div className="text-sm text-slate-500 mt-0.5">
+                    자료 <span className="font-semibold text-slate-700">{c.count}</span>건
+                    <span className="text-slate-300 mx-1">·</span>
+                    {c.groups}개 묶음
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {stats.total === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">

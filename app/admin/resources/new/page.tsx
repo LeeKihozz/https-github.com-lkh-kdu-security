@@ -3,12 +3,15 @@
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { RESOURCE_CATEGORY_LABELS, RESOURCE_CATEGORY_ORDER } from '@/app/lib/utils'
 
 export default function NewResourcePage() {
   const [form, setForm] = useState({
     title: '',
     description: '',
     resourceType: 'PDF',
+    category: 'WORKSHOP',
+    groupName: '',
     storageType: 'FILE',
     driveUrl: '',
     isPublished: true,
@@ -38,6 +41,8 @@ export default function NewResourcePage() {
       fd.append('title', form.title)
       fd.append('description', form.description)
       fd.append('resourceType', form.resourceType)
+      fd.append('category', form.category)
+      fd.append('groupName', form.groupName)
       fd.append('storageType', 'FILE')
       fd.append('file', file)
       fd.append('isPublished', String(form.isPublished))
@@ -109,7 +114,30 @@ export default function NewResourcePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">카테고리</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">분류 <span className="text-red-500">*</span></label>
+            <select name="category" value={form.category} onChange={handleChange} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+              {RESOURCE_CATEGORY_ORDER.map((c) => (
+                <option key={c} value={c}>{RESOURCE_CATEGORY_LABELS[c]}</option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-400 mt-1">자료실 상단 메뉴(워크샵·교육·컨퍼런스·세미나·회의)에서 이 분류로 묶입니다.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">묶음 이름 (행사·과정명)</label>
+            <input
+              type="text"
+              name="groupName"
+              value={form.groupName}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="예: 2025 우주보안 워크샵"
+            />
+            <p className="text-xs text-slate-400 mt-1">같은 이름을 쓰면 발표자료·영상·녹음이 자료실에서 한 묶음으로 묶여 보입니다. 비워두면 단독 자료로 표시됩니다.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">파일 형식</label>
             <select name="resourceType" value={form.resourceType} onChange={handleChange} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
               <option value="PDF">PDF</option>
               <option value="PPT">PPT</option>

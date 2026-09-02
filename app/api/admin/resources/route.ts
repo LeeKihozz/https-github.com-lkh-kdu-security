@@ -37,8 +37,18 @@ export async function POST(req: NextRequest) {
       const resourceType = formData.get('resourceType') as string
       const driveUrl = formData.get('driveUrl') as string | null
       const storageType = formData.get('storageType') as string
+      const category = (formData.get('category') as string) || 'ETC'
+      const groupName = ((formData.get('groupName') as string) || '').trim()
 
-      data = { title, description, resourceType, storageType, uploadedById: session.userId }
+      data = {
+        title,
+        description,
+        resourceType,
+        storageType,
+        category,
+        groupName: groupName || null,
+        uploadedById: session.userId,
+      }
 
       if (file && file.size > 0) {
         if (file.size > MAX_FILE_SIZE) {
@@ -62,7 +72,8 @@ export async function POST(req: NextRequest) {
       if (driveUrl) data.driveUrl = driveUrl
     } else {
       const body = await req.json()
-      data = { ...body, uploadedById: session.userId }
+      const groupName = typeof body.groupName === 'string' ? body.groupName.trim() : ''
+      data = { ...body, groupName: groupName || null, uploadedById: session.userId }
     }
 
     const resource = await db.resource.create({ data: data as Parameters<typeof db.resource.create>[0]['data'] })

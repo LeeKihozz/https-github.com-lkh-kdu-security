@@ -66,10 +66,12 @@ model Achievement {
 }
 
 model Resource {
-  id               String       @id @default(cuid())
+  id               String           @id @default(cuid())
   title            String
   description      String?
   resourceType     ResourceType
+  category         ResourceCategory @default(ETC)
+  groupName        String?
   storageType      StorageType
   filePath         String?
   originalFileName String?
@@ -158,6 +160,15 @@ enum StorageType {
   FILE
   GOOGLE_DRIVE_LINK
   EXTERNAL_LINK
+}
+
+enum ResourceCategory {
+  WORKSHOP
+  EDUCATION
+  CONFERENCE
+  SEMINAR
+  MEETING
+  ETC
 }
 
 model SiteContent {
