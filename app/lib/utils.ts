@@ -67,8 +67,8 @@ export const RESOURCE_CATEGORY_LABELS: Record<string, string> = {
 
 // 자료실 카테고리 탭 순서
 export const RESOURCE_CATEGORY_ORDER = [
-  'WORKSHOP',
   'EDUCATION',
+  'WORKSHOP',
   'CONFERENCE',
   'SEMINAR',
   'MEETING',

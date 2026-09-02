@@ -155,7 +155,7 @@ export default function ResourceStatsBoard({ initial, title, subtitle }: Props) 
                   <div className="text-sm text-slate-500 mt-0.5">
                     자료 <span className="font-semibold text-slate-700">{c.count}</span>건
                     <span className="text-slate-300 mx-1">·</span>
-                    {c.groups}개 묶음
+                    폴더 {c.groups}개
                   </div>
                 </Link>
               )
@@ -173,7 +173,7 @@ export default function ResourceStatsBoard({ initial, title, subtitle }: Props) 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* 유형별 분포 */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="font-bold text-slate-900 mb-1">자료 유형별 구성</h3>
+            <h3 className="font-bold text-slate-900 mb-1">파일 형식별 구성</h3>
             <p className="text-xs text-slate-400 mb-5">전체 {stats.total}건 기준</p>
             <div className="space-y-3">
               {stats.byType.map((t) => {
